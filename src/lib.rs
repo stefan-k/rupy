@@ -1,3 +1,5 @@
+use ndarray::Array1;
+use numpy::{IntoPyArray, PyArrayDyn};
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 
@@ -16,11 +18,31 @@ fn closure(func: PyObject) -> PyResult<()> {
     Ok(())
 }
 
+#[pyfunction]
+/// blah
+fn closure2(func: PyObject) -> PyResult<()> {
+    let gil_guard = Python::acquire_gil();
+    let py = gil_guard.python();
+    func.call1(py, (2.56f64,))?;
+    Ok(())
+}
+
+#[pyfunction]
+/// blah
+fn closure3(func: PyObject) -> PyResult<()> {
+    let gil_guard = Python::acquire_gil();
+    let py = gil_guard.python();
+    let blah = Array1::from_vec(vec![1.0f64, 2.0, 3.0]);
+    func.call1(py, (blah.into_pyarray(py),))?;
+    Ok(())
+}
+
 /// python module
 #[pymodule]
-fn rupy(py: Python, m: &PyModule) -> PyResult<()> {
+fn rupy(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(sum_as_string))?;
     m.add_wrapped(wrap_pyfunction!(closure))?;
+    m.add_wrapped(wrap_pyfunction!(closure2))?;
     Ok(())
 }
 
